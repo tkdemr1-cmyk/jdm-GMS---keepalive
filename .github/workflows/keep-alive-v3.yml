@@ -1,17 +1,14 @@
-name: Supabase Keep Alive
+name: Supabase Keep Alive (GitHub)
 
 on:
   schedule:
-    - cron: '0 9 * * 1,4'   # 매주 월·목 09:00 UTC = 한국시간 18:00
+    - cron: '0 9 * * 1,4'
   workflow_dispatch:
 
 jobs:
   ping-supabase:
     runs-on: ubuntu-latest
     steps:
-      # keep_alive 테이블에서 실제로 SELECT 쿼리를 날린다.
-      # (root(/rest/v1/)만 두드리면 스펙 문서만 돌아올 뿐, 진짜 DB 쿼리가 아니라서
-      #  "활동"으로 인정되지 않을 수 있음 — 반드시 테이블을 조회해야 확실하다)
       - name: Query keep_alive table
         run: |
           curl -sS -o response.json -w "HTTP 상태 코드: %{http_code}\n" \
@@ -21,9 +18,7 @@ jobs:
           echo "응답 내용:"
           cat response.json
 
-# 41일간 사람 커밋이 없으면 여기서 대신 더미 커밋을 넣어
-      # GitHub의 "60일 규칙"을 스스로 회피한다
       - name: Repository keep-alive commit
         uses: efrecon/gh-action-keepalive@main
         with:
-          commit_freshness: 0
+          timeout: 0   # 테스트용: 0초로 두면 무조건 커밋하도록 강제
