@@ -25,5 +25,5 @@ jobs:
       # GitHub의 "60일 규칙"을 스스로 회피한다
       - name: Repository keep-alive commit
         uses: efrecon/gh-action-keepalive@main
-with:
-          commit_freshness: 0   # 테스트용: 무조건 커밋하게 강제
+        with:
+          commit_freshness: 0
