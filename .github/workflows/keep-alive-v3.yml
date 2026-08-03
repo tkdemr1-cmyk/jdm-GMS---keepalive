@@ -20,3 +20,8 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}"
           echo "응답 내용:"
           cat response.json
+
+# 41일간 사람 커밋이 없으면 여기서 대신 더미 커밋을 넣어
+      # GitHub의 "60일 규칙"을 스스로 회피한다
+      - name: Repository keep-alive commit
+        uses: efrecon/gh-action-keepalive@main
