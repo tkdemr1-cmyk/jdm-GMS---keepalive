@@ -21,4 +21,4 @@ jobs:
       - name: Repository keep-alive commit
         uses: efrecon/gh-action-keepalive@main
         with:
-          timeout: 0   # 테스트용: 0초로 두면 무조건 커밋하도록 강제
+          timeout: 3542400   # 41일 (초 단위) — 이 기간 내에 사람 커밋이 없을 때만 대신 커밋
