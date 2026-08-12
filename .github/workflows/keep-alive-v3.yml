@@ -2,26 +2,53 @@ name: Supabase Keep Alive (GitHub)
 
 on:
   schedule:
+    # 매일 오전 9시 17분
     - cron: '17 9 * * *'
       timezone: 'Asia/Seoul'
+
+    # 매일 오후 9시 37분
     - cron: '37 21 * * *'
       timezone: 'Asia/Seoul'
+
+  # Actions 화면에서 수동 실행 가능
   workflow_dispatch:
+
+# 41일 동안 저장소 커밋이 없을 때
+# keepalive 액션이 대신 커밋할 수 있도록 허용
+permissions:
+  contents: write
 
 jobs:
   ping-supabase:
     runs-on: ubuntu-latest
+
     steps:
       - name: Query keep_alive table
+        shell: bash
         run: |
-          curl -sS -o response.json -w "HTTP 상태 코드: %{http_code}\n" \
+          HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" \
             "${{ secrets.SUPABASE_URL }}/rest/v1/keep_alive?select=id&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}"
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}")
+
+          echo "HTTP 상태 코드: $HTTP_CODE"
           echo "응답 내용:"
           cat response.json
+          echo
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Supabase 핑 실패: HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          if ! grep -q '"id":1' response.json; then
+            echo "keep_alive 테이블 응답 검증 실패"
+            exit 1
+          fi
+
+          echo "Supabase 핑 및 응답 검증 성공"
 
       - name: Repository keep-alive commit
         uses: efrecon/gh-action-keepalive@main
         with:
-          timeout: 3542400   # 41일 (초 단위) — 이 기간 내에 사람 커밋이 없을 때만 대신 커밋
+          timeout: 3542400
